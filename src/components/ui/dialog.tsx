@@ -14,7 +14,7 @@ const DialogPortal = DialogPrimitive.Portal
 
 interface DialogProps {
   children?: React.ReactNode;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 const DebugDialogClose = React.forwardRef<HTMLButtonElement, DialogProps>(function DebugDialogClose(props, ref) {

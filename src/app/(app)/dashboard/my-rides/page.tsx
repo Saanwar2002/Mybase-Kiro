@@ -376,7 +376,7 @@ export default function MyRidesPage() {
                     <div className="flex items-center justify-between p-4 border-b">
                       <div className="flex items-center gap-2">
                         <UserCircle className="w-5 h-5 text-primary" />
-                        <span className="font-semibold">{ride.driver || 'Driver'}</span>
+                        <span className="font-semibold">{typeof ride.driver === 'string' ? ride.driver : (ride.driver as any)?.name || 'Driver'}</span>
                         <span className="text-xs text-muted-foreground ml-2">
                           <CalendarDays className="inline w-4 h-4 mr-1" />
                           {formatDate(ride.bookingTimestamp, ride.scheduledPickupAt)}
