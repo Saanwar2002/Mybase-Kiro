@@ -4,11 +4,11 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth, UserRole } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { LogOut, Menu, Settings, UserCircle, ChevronDown, ChevronUp, ListChecks, CheckCircle, ShieldAlert, DatabaseZap, UserCog as UserCogIcon, Layers, Wrench, MessageSquareHeart, Palette, BrainCircuit, Activity, Users, Lightbulb, TrendingUp, Flag, Briefcase, Bell, BellOff, X } from 'lucide-react';
+import { LogOut, Menu, Settings, UserCircle, ChevronDown, ChevronUp, Bell, BellOff, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getNavItemsForRole, NavItem } from './sidebar-nav-items';
@@ -16,11 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import * as LucideIcons from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useOperatorNotifications } from '@/hooks/useOperatorNotifications';
@@ -50,7 +46,7 @@ interface TaskCategory {
   tasks?: TaskItem[];
 }
 
-const DefaultAiTaskIcon = Lightbulb;
+// const DefaultAiTaskIcon = Lightbulb; // Unused
 
 const mapPriorityToStyle = (priority?: 'high' | 'medium' | 'low') => {
   switch (priority) {

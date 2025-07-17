@@ -17,10 +17,9 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Loader2, User as UserIcon, Car as CarIcon, Briefcase as BriefcaseIcon, Shield as ShieldIcon, LogIn } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { useAuth, UserRole } from "@/contexts/auth-context";
-import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff } from "lucide-react";
 
 const formSchema = z.object({

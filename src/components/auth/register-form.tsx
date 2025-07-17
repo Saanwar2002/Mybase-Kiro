@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth, UserRole } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Car, Loader2, Briefcase, Shield, ShieldCheck } from "lucide-react"; 
+import { Car, Loader2, Briefcase } from "lucide-react"; 
 import React, { useState, useEffect, useRef } from "react";
 import { 
   createUserWithEmailAndPassword, 

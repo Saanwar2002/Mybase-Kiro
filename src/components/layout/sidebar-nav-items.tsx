@@ -1,6 +1,6 @@
 
 import type { UserRole } from '@/contexts/auth-context';
-import { LayoutDashboard, Car, Sparkles, MessageCircle, History, UserCircle, Settings, DollarSign, Briefcase, BarChart3, Users, Star, MapPin, Contact, Send, Bot, Building, Shield, UserCog, UserCheck, UserX, UserSearch, BrainCircuit, Activity, CalendarClock, HelpCircle, MessageSquareWarning, CreditCard, Award, ThumbsUp, MessageSquareHeart, ServerCog, FileText, ShieldCheck, Leaf, SlidersHorizontal } from 'lucide-react'; // Added Leaf, SlidersHorizontal
+import { LayoutDashboard, Car, Sparkles, MessageCircle, History, UserCircle, Settings, DollarSign, Briefcase, BarChart3, Users, Star, MapPin, Contact, Send, Building, Shield, UserCog, UserCheck, UserX, UserSearch, BrainCircuit, Activity, CalendarClock, HelpCircle, MessageSquareWarning, CreditCard, Award, ThumbsUp, MessageSquareHeart, ServerCog, SlidersHorizontal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface NavItem {

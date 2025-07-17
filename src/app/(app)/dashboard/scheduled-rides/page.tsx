@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, PlusCircle, Edit, Trash2, Play, Pause, Loader2, AlertTriangle, RefreshCwIcon, Timer, DollarSign } from "lucide-react";
+import { CalendarClock, PlusCircle, Edit, Trash2, Play, Pause, Loader2, AlertTriangle, DollarSign } from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -21,11 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator'; // Added Separator import
 
-
-interface FirestoreTimestamp {
-  _seconds: number;
-  _nanoseconds: number;
-}
 
 export interface LocationPoint { 
   address: string;

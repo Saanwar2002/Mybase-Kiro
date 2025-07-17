@@ -2,6 +2,7 @@ import { TaxiSuggester } from '@/components/ai/taxi-suggester';
 import { CardDescription, CardHeader, CardTitle, Card } from '@/components/ui/card';
 import { Lightbulb } from 'lucide-react';
 
+
 export default function AiSearchPage() {
   return (
     <div className="space-y-6">

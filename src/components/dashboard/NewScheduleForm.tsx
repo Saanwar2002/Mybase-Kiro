@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
@@ -14,10 +14,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { MapPin, Car, DollarSign, Users, Loader2, Route, PlusCircle, XCircle, Calendar as CalendarIcon, Clock, Star, StickyNote, Save, List, Trash2, User as UserIcon, Home as HomeIcon, MapPin as StopMarkerIcon, Mic, Ticket, CalendarClock, Building, AlertTriangle, Info, LocateFixed, CheckCircle2, CreditCard, Coins, Send, Wifi, BadgeCheck, ShieldAlert, Edit, RefreshCwIcon, Timer, AlertCircle, Crown, Dog, Play, Briefcase } from 'lucide-react'; // Added Briefcase
+import { MapPin, Car, DollarSign, Users, Loader2, PlusCircle, XCircle, Calendar as CalendarIcon, Clock, Star, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,7 +25,6 @@ import { Loader as GoogleApiLoader } from '@googlemaps/js-api-loader';
 import { useAuth } from '@/contexts/auth-context';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, addDays, set, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
