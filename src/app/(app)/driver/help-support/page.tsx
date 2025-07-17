@@ -256,7 +256,11 @@ export default function DriverHelpSupportPage() {
                       <TableCell className="text-xs">{ticket.submittedAt ? (
                         typeof ticket.submittedAt === 'object' && '_seconds' in ticket.submittedAt 
                           ? new Date(ticket.submittedAt._seconds * 1000).toLocaleString()
-                          : new Date(ticket.submittedAt).toLocaleString()
+                          : (typeof ticket.submittedAt === 'object' && 'seconds' in ticket.submittedAt
+                             ? new Date(ticket.submittedAt.seconds * 1000).toLocaleString()
+                             : (typeof ticket.submittedAt === 'string' 
+                                ? new Date(ticket.submittedAt).toLocaleString()
+                                : "-"))
                       ) : "-"}</TableCell>
                       <TableCell className="max-w-xs truncate" title={ticket.details}>{ticket.details}</TableCell>
                       <TableCell>
