@@ -57,27 +57,41 @@
   - Add proper typing for API response objects
   - _Requirements: 2.3, 3.4_
 
-- [ ] 3.2 Add null and undefined safety checks
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- [-] 3.2 Add null and undefined safety checks
   - Add optional chaining for object property access
   - Add null checks before method calls
   - Fix potentially undefined object access
   - _Requirements: 2.6, 4.3_
+
+- [x] 3.4 Fix my-rides page TypeScript errors
+  - Fix ride object type definitions and missing properties
+  - Add proper type interfaces for ride data
+  - Fix Timestamp handling and date formatting
+  - _Requirements: 2.3, 2.6_
+
+- [ ] 3.5 Fix track-ride page TypeScript errors
+  - Fix activeRide object type definitions
+  - Add proper null checks for activeRide properties
+  - Fix coordinate type casting for map components
+  - _Requirements: 2.2, 2.6_
+
+- [ ] 3.6 Fix Firebase error handling types
+  - Replace FirebaseError type annotations with unknown
+  - Add proper error type checking in catch blocks
+  - Fix Firebase Auth and Firestore parameter types
+  - _Requirements: 2.4, 2.5_
+
+- [ ] 3.7 Fix API route TypeScript errors
+  - Fix undefined object property access in API routes
+  - Add proper type checking for request parameters
+  - Fix query and collection type mismatches
+  - _Requirements: 2.5, 2.6_
+
+- [ ] 3.8 Fix component prop and children types
+  - Fix ReactNode type assignments in dialog components
+  - Add proper type definitions for component props
+  - Fix children prop access patterns
+  - _Requirements: 2.3, 3.4_
 
 - [ ] 3.3 Fix function signature and return type issues
   - Correct parameter types in function definitions
