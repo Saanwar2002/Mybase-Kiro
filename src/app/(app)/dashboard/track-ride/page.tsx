@@ -309,7 +309,12 @@ export default function MyActiveRidePage() {
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
   const autocompleteSessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | undefined>(undefined);
 
-  const driverLocation = useMemo(() => activeRide?.driverCurrentLocation || huddersfieldCenterGoogle, [activeRide?.driverCurrentLocation]);
+  const driverLocation = useMemo(() => {
+    if (activeRide?.driverCurrentLocation && typeof activeRide.driverCurrentLocation === 'object' && 'lat' in activeRide.driverCurrentLocation && 'lng' in activeRide.driverCurrentLocation) {
+      return activeRide.driverCurrentLocation;
+    }
+    return huddersfieldCenterGoogle;
+  }, [activeRide?.driverCurrentLocation]);
 
   const [passengerAckWindowSecondsLeft, setPassengerAckWindowSecondsLeft] = useState<number | null>(null);
   const [passengerFreeWaitingSecondsLeft, setPassengerFreeWaitingSecondsLeft] = useState<number | null>(null);
@@ -510,7 +515,7 @@ export default function MyActiveRidePage() {
                                  currentLegIndex < ((activeRide.stops?.length || 0) + 1); 
 
     if (isAtIntermediateStop) {
-        const stopDataIndex = currentLegIndex! -1; 
+        const stopDataIndex = (typeof currentLegIndex === 'number' ? currentLegIndex : 0) - 1; 
         const updateStopTimer = () => {
             const now = new Date();
             const secondsSinceStopArrival = Math.floor((now.getTime() - legEntryTime!.getTime()) / 1000);
@@ -698,7 +703,7 @@ export default function MyActiveRidePage() {
         if (!stop.suggestions?.length && !stop.isFetchingSuggestions && isMapSdkLoaded) { 
             fetchAddressSuggestions(stop.inputValue, 
                 (sugg) => setDialogStopAutocompleteData(prev => prev.map((item,idx) => idx === fieldNameOrIndex ? {...item, suggestions: sugg} : item)),
-                (fetch) => setDialogStopAutocompleteData(prev => prev.map((item,idx) => idx === fieldNameOrStopIndex ? {...item, isFetchingSuggestions: fetch} : item))
+                (fetch) => setDialogStopAutocompleteData(prev => prev.map((item,idx) => idx === fieldNameOrIndex ? {...item, isFetchingSuggestions: fetch} : item))
             );
         }
       }
@@ -909,14 +914,18 @@ export default function MyActiveRidePage() {
     }
 
     if (activeRide.pickupLocation && typeof activeRide.pickupLocation === 'object' && 'latitude' in activeRide.pickupLocation && 'longitude' in activeRide.pickupLocation && 'address' in activeRide.pickupLocation) {
+      const pickupLat = typeof activeRide.pickupLocation.latitude === 'number' ? activeRide.pickupLocation.latitude : 0;
+      const pickupLng = typeof activeRide.pickupLocation.longitude === 'number' ? activeRide.pickupLocation.longitude : 0;
+      const pickupAddress = typeof activeRide.pickupLocation.address === 'string' ? activeRide.pickupLocation.address : 'Pickup';
+      
       markers.push({
-        position: { lat: activeRide.pickupLocation.latitude, lng: activeRide.pickupLocation.longitude },
-        title: `Pickup: ${activeRide.pickupLocation.address}`,
+        position: { lat: pickupLat, lng: pickupLng },
+        title: `Pickup: ${pickupAddress}`,
         label: { text: "P", color: "white", fontWeight: "bold" }
       });
       labels.push({
-        position: { lat: activeRide.pickupLocation.latitude, lng: activeRide.pickupLocation.longitude },
-        content: formatAddressForMapLabel(activeRide.pickupLocation.address, 'Pickup'),
+        position: { lat: pickupLat, lng: pickupLng },
+        content: formatAddressForMapLabel(pickupAddress, 'Pickup'),
         type: 'pickup'
       });
     }
@@ -939,14 +948,18 @@ export default function MyActiveRidePage() {
 
     // Optionally, add dropoff marker/label here if you want it always visible
     if (activeRide.dropoffLocation && typeof activeRide.dropoffLocation === 'object' && 'latitude' in activeRide.dropoffLocation && 'longitude' in activeRide.dropoffLocation && 'address' in activeRide.dropoffLocation) {
+      const dropoffLat = typeof activeRide.dropoffLocation.latitude === 'number' ? activeRide.dropoffLocation.latitude : 0;
+      const dropoffLng = typeof activeRide.dropoffLocation.longitude === 'number' ? activeRide.dropoffLocation.longitude : 0;
+      const dropoffAddress = typeof activeRide.dropoffLocation.address === 'string' ? activeRide.dropoffLocation.address : 'Dropoff';
+      
       markers.push({
-        position: { lat: activeRide.dropoffLocation.latitude, lng: activeRide.dropoffLocation.longitude },
-        title: `Dropoff: ${activeRide.dropoffLocation.address}`,
+        position: { lat: dropoffLat, lng: dropoffLng },
+        title: `Dropoff: ${dropoffAddress}`,
         label: { text: "D", color: "white", fontWeight: "bold" }
       });
       labels.push({
-        position: { lat: activeRide.dropoffLocation.latitude, lng: activeRide.dropoffLocation.longitude },
-        content: formatAddressForMapLabel(activeRide.dropoffLocation.address, 'Dropoff'),
+        position: { lat: dropoffLat, lng: dropoffLng },
+        content: formatAddressForMapLabel(dropoffAddress, 'Dropoff'),
         type: 'dropoff'
       });
     }
