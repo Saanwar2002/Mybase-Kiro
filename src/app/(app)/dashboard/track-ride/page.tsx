@@ -1080,7 +1080,7 @@ export default function MyActiveRidePage() {
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg"> <CardHeader> <CardTitle className="text-3xl font-headline flex items-center gap-2"><MapPin className="w-8 h-8 text-primary" /> My Active Ride</CardTitle> <CardDescription>Track your current ride details and status live. Ride ID: {activeRide?.displayBookingId || activeRide?.id || "N/A"}</CardDescription> </CardHeader> </Card>
+      <Card className="shadow-lg"> <CardHeader> <CardTitle className="text-3xl font-headline flex items-center gap-2"><MapPin className="w-8 h-8 text-primary" /> My Active Ride</CardTitle> <CardDescription>Track your current ride details and status live. Ride ID: {(typeof activeRide?.displayBookingId === 'string' ? activeRide.displayBookingId : '') || (typeof activeRide?.id === 'string' ? activeRide.id : '') || "N/A"}</CardDescription> </CardHeader> </Card>
       {!activeRide && !loading && ( <Card> <CardContent className="pt-6 text-center text-muted-foreground"> <p className="text-lg mb-4">You have no active rides at the moment.</p> <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground"><Link href="/dashboard/book-ride"><span>Book a New Ride</span></Link></Button> </CardContent> </Card> )}
       {activeRide && (
         <>
@@ -1149,7 +1149,7 @@ export default function MyActiveRidePage() {
                   </Alert>
                 )}
                 
-                {activeRide.paymentMethod === 'account' && activeRide.accountJobPin && (
+                {activeRide.paymentMethod === 'account' && activeRide.accountJobPin && typeof activeRide.accountJobPin === 'string' && (
                   <div className="my-2 p-2.5 bg-purple-50 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 rounded-md text-center shadow-sm">
                     <span className="text-sm text-purple-700 dark:text-purple-300 font-medium">
                       Your One Time PIN for Driver: <strong className="text-lg font-bold tracking-wider text-purple-800 dark:text-purple-200">{activeRide.accountJobPin}</strong>
@@ -1274,7 +1274,7 @@ export default function MyActiveRidePage() {
                       <Badge variant="outline" className="ml-1.5 border-orange-300 text-orange-100 bg-orange-500/50">Surge</Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground pl-5">Booking ID: {activeRide?.displayBookingId || activeRide?.id || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground pl-5">Booking ID: {(typeof activeRide?.displayBookingId === 'string' ? activeRide.displayBookingId : '') || (typeof activeRide?.id === 'string' ? activeRide.id : '') || 'N/A'}</p>
 
                 <div className="bg-primary/10 p-2 rounded-md border border-black/70 flex items-center gap-1.5"> {activeRide.paymentMethod === 'card' ? <CreditCard className="w-4 h-4 text-muted-foreground" /> : activeRide.paymentMethod === 'cash' ? <Coins className="w-4 h-4 text-muted-foreground" /> : <Briefcase className="w-4 h-4 text-muted-foreground" />} <strong>Payment:</strong> {paymentDisplay} </div> </div>
                  {activeRide.status === 'arrived_at_pickup' && !activeRide.passengerAcknowledgedArrivalTimestamp && ( <Button className="w-full bg-green-600 hover:bg-green-700 text-white mt-2" onClick={() => handleAcknowledgeArrival(activeRide.id)}> <CheckCheck className="mr-2 h-5 w-5" /> Acknowledge Driver Arrival </Button> )}
@@ -1324,7 +1324,7 @@ export default function MyActiveRidePage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will cancel your ride request (ID: {activeRide?.displayBookingId || activeRide?.id || rideIdToCancel || 'N/A'}). This action cannot be undone.
+                This will cancel your ride request (ID: {(typeof activeRide?.displayBookingId === 'string' ? activeRide.displayBookingId : '') || (typeof activeRide?.id === 'string' ? activeRide.id : '') || (typeof rideIdToCancel === 'string' ? rideIdToCancel : '') || 'N/A'}). This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -1350,7 +1350,7 @@ export default function MyActiveRidePage() {
       <Dialog open={isEditDetailsDialogOpen} onOpenChange={(open) => { if(!open) {setRideToEditDetails(null); setIsEditDetailsDialogOpen(false); editDetailsForm.reset(); setDialogFareEstimate(null);}}}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] grid grid-rows-[auto_minmax(0,1fr)_auto] p-0">
           <div>
-            <DialogHeader className="p-6 pb-0"> <ShadDialogTitle>Edit Booking Details (ID: {activeRide?.displayBookingId || activeRide?.id || "N/A"})</ShadDialogTitle> <ShadDialogDescriptionDialog>Modify your ride details. Changes only apply if driver not yet assigned.</ShadDialogDescriptionDialog> </DialogHeader>
+            <DialogHeader className="p-6 pb-0"> <ShadDialogTitle>Edit Booking Details (ID: {(typeof activeRide?.displayBookingId === 'string' ? activeRide.displayBookingId : '') || (typeof activeRide?.id === 'string' ? activeRide.id : '') || "N/A"})</ShadDialogTitle> <ShadDialogDescriptionDialog>Modify your ride details. Changes only apply if driver not yet assigned.</ShadDialogDescriptionDialog> </DialogHeader>
             <ScrollArea className="overflow-y-auto"> <div className="px-6 py-4"> <Form {...editDetailsForm}> <form id="edit-details-form-actual" onSubmit={editDetailsForm.handleSubmit(onEditDetailsSubmit)} className="space-y-4">
             <FormField control={editDetailsForm.control} name="pickupDoorOrFlat" render={({ field }) => (<FormItem><FormLabel>Pickup Door/Flat</FormLabel><FormControl><Input placeholder="Optional" {...field} className="h-8 text-sm" /></FormControl><FormMessage className="text-xs"/></FormItem>)} />
             <FormField control={editDetailsForm.control} name="pickupLocation" render={({ field }) => ( <FormItem><FormLabel>Pickup Address</FormLabel><div className="relative"><FormControl><Input placeholder="Search pickup" {...field} value={dialogPickupInputValue} onChange={(e) => handleEditAddressInputChangeFactory('pickupLocation')(e.target.value, field.onChange)} onFocus={() => handleEditFocusFactory('pickupLocation')} onBlur={() => handleEditBlurFactory('pickupLocation')} autoComplete="off" className="pr-8 h-9" /></FormControl> {showDialogPickupSuggestions && renderAutocompleteSuggestions(dialogPickupSuggestions, isFetchingDialogPickupSuggestions, isFetchingDialogPickupDetails, dialogPickupInputValue, (sugg) => handleEditSuggestionClickFactory('pickupLocation')(sugg, field.onChange), "dialog-pickup")}</div><FormMessage /></FormItem> )} />
