@@ -320,6 +320,10 @@ export default function MyRidesPage() {
     uniqueDriverIds.forEach(async (driverId) => {
       if (!driverId || driverCustomIds[driverId]) return;
       try {
+        if (!db) {
+          console.warn('Database not initialized');
+          return;
+        }
         const driverDoc = await getDoc(doc(db, 'users', driverId));
         if (driverDoc.exists()) {
           const data = driverDoc.data();

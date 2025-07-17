@@ -413,7 +413,7 @@ export default function MyActiveRidePage() {
       let timeoutDate: Date;
       if (activeRide.timeoutAt instanceof Timestamp) {
         timeoutDate = activeRide.timeoutAt.toDate();
-      } else if ('_seconds' in activeRide.timeoutAt && typeof activeRide.timeoutAt._seconds === 'number') {
+      } else if (activeRide.timeoutAt && typeof activeRide.timeoutAt === 'object' && '_seconds' in activeRide.timeoutAt && typeof activeRide.timeoutAt._seconds === 'number') {
         timeoutDate = new Date(activeRide.timeoutAt._seconds * 1000);
       } else {
         // Fallback to current time if format is unknown

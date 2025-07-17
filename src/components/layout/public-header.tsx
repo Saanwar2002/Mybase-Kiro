@@ -45,7 +45,7 @@ const Button = ({ children, asChild, size, ...props }: ButtonProps) => {
       className={`bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium transition-colors ${sizeClasses}`}
       {...props}
     >
-      {children.props.children /* Access children of Link */}
+      {children && typeof children === 'object' && 'props' in children ? children.props.children : children}
     </button>
   );
 };

@@ -76,7 +76,7 @@ function NotificationBell() {
   const prevNotifCount = React.useRef(notifications.length);
 
   React.useEffect(() => {
-    localStorage.setItem('notifMuted', muted);
+    localStorage.setItem('notifMuted', String(muted));
   }, [muted]);
   React.useEffect(() => {
     localStorage.setItem('notifVolume', String(volume));
