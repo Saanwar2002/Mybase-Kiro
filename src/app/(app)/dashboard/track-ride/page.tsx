@@ -70,11 +70,10 @@ interface LocationPoint {
   doorOrFlat?: string;
 }
 
-interface SerializedTimestamp {
-  _seconds: number;
-  _nanoseconds: number;
-}
+// Import SerializedTimestamp and Timestamp from global types
+import { SerializedTimestamp, Timestamp } from '@/types/global';
 
+// Enhanced ActiveRide interface with proper type handling
 interface ActiveRide {
   id: string;
   displayBookingId?: string;
@@ -95,26 +94,27 @@ interface ActiveRide {
   priorityFeeAmount?: number;
   isSurgeApplied?: boolean;
   paymentMethod?: "card" | "cash" | "account";
-  bookingTimestamp?: SerializedTimestamp | null;
+  bookingTimestamp?: SerializedTimestamp | Timestamp | null;
   scheduledPickupAt?: string | null;
-  notifiedPassengerArrivalTimestamp?: SerializedTimestamp | string | null;
-  passengerAcknowledgedArrivalTimestamp?: SerializedTimestamp | string | null;
-  rideStartedAt?: SerializedTimestamp | string | null;
-  driverCurrentLocation?: { lat: number; lng: number };
+  notifiedPassengerArrivalTimestamp?: SerializedTimestamp | Timestamp | string | null;
+  passengerAcknowledgedArrivalTimestamp?: SerializedTimestamp | Timestamp | string | null;
+  rideStartedAt?: SerializedTimestamp | Timestamp | string | null;
+  driverCurrentLocation?: google.maps.LatLngLiteral;
   driverEtaMinutes?: number;
   waitAndReturn?: boolean;
   estimatedAdditionalWaitTimeMinutes?: number;
   accountJobPin?: string;
   driverCurrentLegIndex?: number; 
-  currentLegEntryTimestamp?: SerializedTimestamp | string | null; 
+  currentLegEntryTimestamp?: SerializedTimestamp | Timestamp | string | null; 
   completedStopWaitCharges?: Record<number, number>;
   // New fields for enhanced booking tracking
   assignmentMethod?: string;
   dispatchMode?: string;
-  timeoutAt?: SerializedTimestamp | null;
-  queuedAt?: SerializedTimestamp | null;
-  cancelledAt?: SerializedTimestamp | null;
+  timeoutAt?: SerializedTimestamp | Timestamp | null;
+  queuedAt?: SerializedTimestamp | Timestamp | null;
+  cancelledAt?: SerializedTimestamp | Timestamp | null;
   cancellationReason?: string;
+  [key: string]: unknown; // Allow additional properties from Firestore
 }
 
 const formatDate = (timestamp?: SerializedTimestamp | string | null, isoString?: string | null): string => {
@@ -180,15 +180,25 @@ const blueDotSvg = `
 const blueDotSvgDataUrl = typeof window !== 'undefined' ? `data:image/svg+xml;base64,${window.btoa(blueDotSvg)}` : '';
 
 
-const parseTimestampToDatePassenger = (timestamp: SerializedTimestamp | string | null | undefined): Date | null => {
+const parseTimestampToDatePassenger = (timestamp: SerializedTimestamp | Timestamp | string | null | undefined): Date | null => {
   if (!timestamp) return null;
+  
+  // Handle string timestamps
   if (typeof timestamp === 'string') {
     const date = new Date(timestamp);
     return isNaN(date.getTime()) ? null : date;
   }
-  if (typeof timestamp === 'object' && ('_seconds' in timestamp) && ('_nanoseconds' in timestamp)) {
+  
+  // Handle Firebase Timestamp objects
+  if (timestamp instanceof Timestamp && typeof timestamp.toDate === 'function') {
+    return timestamp.toDate();
+  }
+  
+  // Handle SerializedTimestamp objects
+  if (typeof timestamp === 'object' && '_seconds' in timestamp && '_nanoseconds' in timestamp) {
     return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000);
   }
+  
   return null;
 };
 
@@ -310,8 +320,30 @@ export default function MyActiveRidePage() {
   const autocompleteSessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | undefined>(undefined);
 
   const driverLocation = useMemo(() => {
-    if (activeRide?.driverCurrentLocation && typeof activeRide.driverCurrentLocation === 'object' && 'lat' in activeRide.driverCurrentLocation && 'lng' in activeRide.driverCurrentLocation) {
-      return activeRide.driverCurrentLocation;
+    if (activeRide?.driverCurrentLocation) {
+      // Ensure driverCurrentLocation is a valid LatLngLiteral
+      if (typeof activeRide.driverCurrentLocation === 'object' && 
+          'lat' in activeRide.driverCurrentLocation && 
+          'lng' in activeRide.driverCurrentLocation &&
+          typeof activeRide.driverCurrentLocation.lat === 'number' &&
+          typeof activeRide.driverCurrentLocation.lng === 'number') {
+        return {
+          lat: activeRide.driverCurrentLocation.lat,
+          lng: activeRide.driverCurrentLocation.lng
+        } as google.maps.LatLngLiteral;
+      }
+      
+      // Handle case where we have latitude/longitude instead of lat/lng
+      if (typeof activeRide.driverCurrentLocation === 'object' &&
+          'latitude' in activeRide.driverCurrentLocation &&
+          'longitude' in activeRide.driverCurrentLocation &&
+          typeof activeRide.driverCurrentLocation.latitude === 'number' &&
+          typeof activeRide.driverCurrentLocation.longitude === 'number') {
+        return {
+          lat: activeRide.driverCurrentLocation.latitude,
+          lng: activeRide.driverCurrentLocation.longitude
+        } as google.maps.LatLngLiteral;
+      }
     }
     return huddersfieldCenterGoogle;
   }, [activeRide?.driverCurrentLocation]);
@@ -377,7 +409,17 @@ export default function MyActiveRidePage() {
     }
 
     if (activeRide?.status === 'pending_assignment' && activeRide?.timeoutAt) {
-      const timeoutDate = new Date(activeRide.timeoutAt._seconds * 1000);
+      // Handle different timestamp formats safely
+      let timeoutDate: Date;
+      if (activeRide.timeoutAt instanceof Timestamp) {
+        timeoutDate = activeRide.timeoutAt.toDate();
+      } else if ('_seconds' in activeRide.timeoutAt && typeof activeRide.timeoutAt._seconds === 'number') {
+        timeoutDate = new Date(activeRide.timeoutAt._seconds * 1000);
+      } else {
+        // Fallback to current time if format is unknown
+        timeoutDate = new Date();
+        console.warn('Unknown timestamp format for timeoutAt:', activeRide.timeoutAt);
+      }
       
       const updateCountdown = () => {
         const now = new Date();
@@ -905,8 +947,11 @@ export default function MyActiveRidePage() {
     const isActiveRideState = activeRide.status && !['completed', 'cancelled', 'cancelled_by_driver', 'cancelled_no_show'].includes(activeRide.status.toLowerCase());
 
     if (activeRide.driverCurrentLocation) {
+      // Ensure driverCurrentLocation is a valid LatLngLiteral
+      const driverPos = driverLocation; // Use the memoized value that's already properly typed
+      
       markers.push({
-        position: activeRide.driverCurrentLocation,
+        position: driverPos,
         title: "Your Driver",
         iconUrl: driverCarIconDataUrl,
         iconScaledSize: { width: 40, height: 50 }
@@ -1086,7 +1131,7 @@ export default function MyActiveRidePage() {
         <>
           <div className="relative w-full h-72 md:h-96 rounded-lg overflow-hidden shadow-md border">
             <GoogleMapDisplay 
-              center={driverLocation} 
+              center={driverLocation as google.maps.LatLngLiteral} 
               zoom={14} 
               markers={mapElements.markers} 
               customMapLabels={mapElements.labels}
