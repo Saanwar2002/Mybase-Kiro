@@ -119,11 +119,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     finalUpdatePayload.updatedAt = Timestamp.fromDate(new Date());
 
     // Handle nullable fields explicitly to allow setting them to null or removing them
-    const nullableFields: Array<keyof typeof finalUpdatePayload> = ['returnPickupTime', 'estimatedWaitTimeMinutesOutbound', 'driverNotes', 'estimatedFareOneWay', 'estimatedFareReturn'];
-    nullableFields.forEach(field => {
-        if (finalUpdatePayload[field] === null) {
-            finalUpdatePayload[field] = null; // Firestore accepts null
-        } else if (finalUpdatePayload[field] === undefined && existingScheduleData && existingScheduleData[field] !== undefined) {
+    const nullableFields = ['returnPickupTime', 'estimatedWaitTimeMinutesOutbound', 'driverNotes', 'estimatedFareOneWay', 'estimatedFareReturn'] as const;
+    nullableFields.forEach((field) => {
+        if ((finalUpdatePayload as any)[field] === null) {
+            (finalUpdatePayload as any)[field] = null; // Firestore accepts null
+        } else if ((finalUpdatePayload as any)[field] === undefined && existingScheduleData && (existingScheduleData as any)[field] !== undefined) {
             // If undefined in payload but exists in DB, means don't change it. If explicitly want to remove, send null.
         }
     });

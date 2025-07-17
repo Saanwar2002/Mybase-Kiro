@@ -12,7 +12,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const operatorId = searchParams.get('operatorId');
     const bookingsRef = db.collection('bookings');
-    let query = bookingsRef;
+    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = bookingsRef;
     if (operatorId) {
       query = query.where('operatorId', '==', operatorId);
     }

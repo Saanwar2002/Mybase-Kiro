@@ -458,25 +458,13 @@ export async function POST(request: NextRequest, context: PostContext) {
           // --- CREDIT ACCOUNT UPDATE LOGIC END ---
 
           // --- Ride Offer Status Update Logic ---
-          if (updateDataFromPayload.action === 'accept_ride') {
-            // Mark the ride offer as accepted
-            try {
-              const offerRef = db.collection('rideOffers').doc(bookingIdForHandler);
-              await offerRef.update({ status: 'accepted', acceptedAt: FieldValue.serverTimestamp() });
-              console.log(`Ride offer for booking ${bookingIdForHandler} marked as accepted.`);
-            } catch (err) {
-              console.error(`Failed to update ride offer status to accepted for booking ${bookingIdForHandler}:`, err);
-            }
-          }
-          if (updateDataFromPayload.action === 'complete_ride') {
-            // Mark the ride offer as completed (or delete it)
-            try {
-              const offerRef = db.collection('rideOffers').doc(bookingIdForHandler);
-              await offerRef.update({ status: 'completed', completedAt: FieldValue.serverTimestamp() });
-              console.log(`Ride offer for booking ${bookingIdForHandler} marked as completed.`);
-            } catch (err) {
-              console.error(`Failed to update ride offer status to completed for booking ${bookingIdForHandler}:`, err);
-            }
+          // Mark the ride offer as completed since this is the complete_ride action
+          try {
+            const offerRef = db.collection('rideOffers').doc(bookingIdForHandler);
+            await offerRef.update({ status: 'completed', completedAt: FieldValue.serverTimestamp() });
+            console.log(`Ride offer for booking ${bookingIdForHandler} marked as completed.`);
+          } catch (err) {
+            console.error(`Failed to update ride offer status to completed for booking ${bookingIdForHandler}:`, err);
           }
       } else if (updateDataFromPayload.action === 'cancel_active') {
           updatePayloadFirestore.status = 'cancelled_by_driver';
@@ -677,13 +665,6 @@ export async function POST(request: NextRequest, context: PostContext) {
 
       console.log(`API POST /api/operator/bookings/${bookingIdForHandler}: Update successful. Returning:`, JSON.stringify(responseData, null, 2));
       return NextResponse.json({ message: 'Booking updated successfully', booking: responseData }, { status: 200 });
-    }
-
-    if (updateDataFromPayload.driverId && updateDataFromPayload.action === 'accept_ride') {
-      updatePayloadFirestore.status = 'driver_assigned';
-    }
-    if (updateDataFromPayload.driverId && updateDataFromPayload.action !== 'accept_ride') {
-      updatePayloadFirestore.status = 'pending_assignment';
     }
 
   } catch (error: any) {

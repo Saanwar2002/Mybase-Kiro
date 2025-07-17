@@ -17,9 +17,19 @@ interface AddFavoriteLocationPayload {
 
 export async function POST(req: Request) {
   try {
-    const data = await req.json();
-    data.createdAt = Timestamp.now();
-    const docRef = await db.collection('favoriteLocations').add(data);
+    const data: AddFavoriteLocationPayload = await req.json();
+    
+    // Validate required fields
+    if (!data.userId || !data.label || !data.address || typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
+      return NextResponse.json({ error: 'Missing required fields: userId, label, address, latitude, longitude' }, { status: 400 });
+    }
+    
+    const favoriteLocationData = {
+      ...data,
+      createdAt: Timestamp.now()
+    };
+    
+    const docRef = await db.collection('favoriteLocations').add(favoriteLocationData);
     const docSnap = await docRef.get();
     return NextResponse.json({
       id: docRef.id,
