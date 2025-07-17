@@ -938,7 +938,7 @@ export default function MyActiveRidePage() {
     });
 
     // Optionally, add dropoff marker/label here if you want it always visible
-    if (activeRide.dropoffLocation) {
+    if (activeRide.dropoffLocation && typeof activeRide.dropoffLocation === 'object' && 'latitude' in activeRide.dropoffLocation && 'longitude' in activeRide.dropoffLocation && 'address' in activeRide.dropoffLocation) {
       markers.push({
         position: { lat: activeRide.dropoffLocation.latitude, lng: activeRide.dropoffLocation.longitude },
         title: `Dropoff: ${activeRide.dropoffLocation.address}`,
@@ -1017,8 +1017,8 @@ export default function MyActiveRidePage() {
   const renderAutocompleteSuggestions = ( suggestions: google.maps.places.AutocompletePrediction[], isFetchingSugg: boolean, isFetchingDet: boolean, inputValue: string, onSuggClick: (suggestion: google.maps.places.AutocompletePrediction) => void, fieldKey: string ) => ( <ScrollArea className="absolute z-20 w-full mt-1 bg-card border rounded-md shadow-lg max-h-60"> <div className="space-y-1 p-1"> {isFetchingSugg && <div className="p-2 text-sm text-muted-foreground flex items-center justify-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...</div>} {isFetchingDet && <div className="p-2 text-sm text-muted-foreground flex items-center justify-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching...</div>} {!isFetchingSugg && !isFetchingDet && suggestions.length === 0 && inputValue.length >= 2 && <div className="p-2 text-sm text-muted-foreground">No suggestions.</div>} {!isFetchingSugg && !isFetchingDet && suggestions.map((s) => { console.log(`[RenderSuggestions DEBUG for ${fieldKey}] Rendering suggestion: ${s.description}`); return( <div key={`${fieldKey}-${s.place_id}`} className="p-2 text-sm hover:bg-muted cursor-pointer rounded-sm" onMouseDown={() => onSuggClick(s)}>{s.description}</div> );})} </div> </ScrollArea> );
   const vehicleTypeDisplay = activeRide?.vehicleType || 'Vehicle N/A';
   const statusDisplay = activeRide?.status ? activeRide.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Status N/A';
-  const pickupAddressDisplay = activeRide?.pickupLocation?.address || 'Pickup N/A';
-  const dropoffAddressDisplay = activeRide?.dropoffLocation?.address || 'Dropoff N/A';
+  const pickupAddressDisplay = (activeRide?.pickupLocation && typeof activeRide.pickupLocation === 'object' && 'address' in activeRide.pickupLocation) ? activeRide.pickupLocation.address : 'Pickup N/A';
+  const dropoffAddressDisplay = (activeRide?.dropoffLocation && typeof activeRide.dropoffLocation === 'object' && 'address' in activeRide.dropoffLocation) ? activeRide.dropoffLocation.address : 'Dropoff N/A';
   
   let baseFareWithWRSurcharge = rideToEditDetails?.fareEstimate || 0;
   let finalFareDisplay = "";
@@ -1052,12 +1052,16 @@ export default function MyActiveRidePage() {
   console.log('DEBUG activeRide:', activeRide);
 
   const bookedTimeDisplay = activeRide?.bookingTimestamp
-    ? new Date(activeRide.bookingTimestamp.seconds * 1000).toLocaleString()
+    ? (typeof activeRide.bookingTimestamp === 'object' && 'seconds' in activeRide.bookingTimestamp 
+       ? new Date(activeRide.bookingTimestamp.seconds * 1000).toLocaleString()
+       : (typeof activeRide.bookingTimestamp === 'object' && '_seconds' in activeRide.bookingTimestamp
+          ? new Date(activeRide.bookingTimestamp._seconds * 1000).toLocaleString()
+          : 'N/A'))
     : 'N/A';
   const fareDisplay = activeRide?.fareEstimate != null
     ? `£${Number(activeRide.fareEstimate).toFixed(2)}`
     : 'Fare N/A';
-  const paymentDisplay = activeRide?.paymentMethod
+  const paymentDisplay = (activeRide?.paymentMethod && typeof activeRide.paymentMethod === 'string')
     ? activeRide.paymentMethod.charAt(0).toUpperCase() + activeRide.paymentMethod.slice(1)
     : 'Payment N/A';
 
@@ -1140,7 +1144,7 @@ export default function MyActiveRidePage() {
                   </div>
                 )}
 
-                {activeRide.status === 'driver_assigned' && activeRide.driverEtaMinutes && activeRide.driverEtaMinutes > 0 && (
+                {activeRide.status === 'driver_assigned' && activeRide.driverEtaMinutes && typeof activeRide.driverEtaMinutes === 'number' && activeRide.driverEtaMinutes > 0 && (
                   <Alert variant="default" className="bg-blue-100 dark:bg-blue-700/40 border-blue-400 dark:border-blue-600 text-blue-700 dark:text-blue-200 p-2">
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-2">
@@ -1210,7 +1214,7 @@ export default function MyActiveRidePage() {
                   </Alert>
                 )}
 
-                {currentPassengerStopTimerDisplay && activeRide.driverCurrentLegIndex !== undefined && activeRide.driverCurrentLegIndex > 0 && activeRide.driverCurrentLegIndex < journeyLegCount -1 && (
+                {currentPassengerStopTimerDisplay && activeRide.driverCurrentLegIndex !== undefined && typeof activeRide.driverCurrentLegIndex === 'number' && activeRide.driverCurrentLegIndex > 0 && activeRide.driverCurrentLegIndex < journeyLegCount -1 && (
                   <Alert variant="default" className={cn("my-1 p-1.5", 
                     currentPassengerStopTimerDisplay.extraSeconds && currentPassengerStopTimerDisplay.extraSeconds > 0 ? "bg-red-100 dark:bg-red-700/80 border-red-500 dark:border-red-600 text-red-900 dark:text-red-100" : "bg-sky-100 dark:bg-sky-800/70 border-sky-300 dark:border-sky-600 text-sky-800 dark:text-sky-200"
                   )}>
