@@ -87,7 +87,7 @@
   - Fix query and collection type mismatches
   - _Requirements: 2.5, 2.6_
 
-- [ ] 3.8 Fix component prop and children types
+- [x] 3.8 Fix component prop and children types
   - Fix ReactNode type assignments in dialog components
   - Add proper type definitions for component props
   - Fix children prop access patterns
@@ -100,7 +100,7 @@
   - _Requirements: 2.5, 3.4_
 
 - [ ] 4. ESLint Code Quality Fixes
-- [ ] 4.1 Remove unused imports and variables
+- [-] 4.1 Remove unused imports and variables
   - Remove unused Lucide icon imports
   - Remove unused ShadCN component imports
   - Remove unused state variables and functions
