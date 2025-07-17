@@ -43,7 +43,7 @@ export default function FavoriteDriversPage() {
         title: 'Driver Removed',
         description: 'The driver has been removed from your favorites.',
       });
-    } catch (err: FirebaseError) {
+    } catch (err: unknown) {
       toast({
         title: 'Error',
         description: 'Failed to remove favorite driver.',

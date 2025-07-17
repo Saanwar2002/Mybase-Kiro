@@ -169,9 +169,10 @@ export function RegisterForm() {
           console.error("Error rendering reCAPTCHA in useEffect:", err);
           toast({title: "reCAPTCHA Render Error", description: `Could not render reCAPTCHA: ${err.message}. Try refreshing.`, variant: "destructive"});
         });
-      } catch (e: FirebaseError) {
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
         console.error("Error initializing RecaptchaVerifier for registration:", e);
-        toast({title: "reCAPTCHA Init Error", description: `Could not initialize reCAPTCHA: ${e.message}`, variant: "destructive"});
+        toast({title: "reCAPTCHA Init Error", description: `Could not initialize reCAPTCHA: ${errorMessage}`, variant: "destructive"});
       }
     }
   }, [auth, registrationStep, toast]); 
@@ -298,9 +299,10 @@ export function RegisterForm() {
             setConfirmationResult(confirmation);
             setRegistrationStep('verifyingPhone');
             setIsSubmitting(false);
-          } catch (phoneError: FirebaseError) {
+          } catch (phoneError: unknown) {
+            const errorMessage = phoneError instanceof Error ? phoneError.message : String(phoneError);
             console.error("Error sending phone verification code:", phoneError);
-            toast({ title: "Phone Verification Failed", description: `Could not send verification code: ${phoneError.message || phoneError}`, variant: "destructive", duration: 7000 });
+            toast({ title: "Phone Verification Failed", description: `Could not send verification code: ${errorMessage}`, variant: "destructive", duration: 7000 });
             // Even if phone fails, proceed to login
             toast({ title: "Registration complete", description: "You can now log in."});
             router.push('/login');
@@ -323,7 +325,7 @@ export function RegisterForm() {
           toast({ title: "Registration Successful!", description: `Welcome, ${values.name}! Your MyBase account as a ${values.role} has been created. ${values.role === 'driver' ? `Your assigned driver suffix (mock) is ${userProfile.driverIdentifier}.` : ''} ${values.role === 'admin' || values.role === 'operator' ? 'Your account is pending approval. You will be notified once approved.' : ''}` });
           setIsSubmitting(false);
         }
-      } catch (error: FirebaseError) {
+      } catch (error: unknown) {
         handleRegistrationError(error);
         setIsSubmitting(false);
         setFirebaseUserForLinking(null);
@@ -375,16 +377,16 @@ export function RegisterForm() {
             finalProfile?.driverIdentifier
         );
         setIsSubmitting(false);
-      } catch (error: FirebaseError) {
+      } catch (error: unknown) {
         handleRegistrationError(error);
         setIsSubmitting(false);
       }
     }
   }
 
-  function handleRegistrationError(error: FirebaseError) {
+  function handleRegistrationError(error: unknown) {
     let errorMessage = "An unknown error occurred during registration.";
-    if (error.code) {
+    if (error && typeof error === 'object' && 'code' in error && error.code) {
       switch (error.code) {
         case 'auth/email-already-in-use': errorMessage = 'This email is already in use.'; break;
         case 'auth/invalid-email': errorMessage = 'The email address is not valid.'; break;

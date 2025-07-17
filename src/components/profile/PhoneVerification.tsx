@@ -31,8 +31,9 @@ export default function PhoneVerification() {
       const result = await signInWithPhoneNumber(auth, phone, appVerifier);
       setConfirmationResult(result);
       setStatus('sent');
-    } catch (err: FirebaseError) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
       setStatus('error');
     }
   };
@@ -54,8 +55,9 @@ export default function PhoneVerification() {
         setStatus('verified');
         setEditing(false);
       }
-    } catch (err: FirebaseError) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
       setStatus('error');
     }
   };

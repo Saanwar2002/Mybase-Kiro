@@ -221,12 +221,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log(`AuthContext.loginWithEmail: Attempting signInWithEmailAndPassword for ${email}`);
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       console.log("AuthContext.loginWithEmail: signInWithEmailAndPassword SUCCESS for UID:", userCredential.user.uid);
-    } catch (error: FirebaseError) {
+    } catch (error: unknown) {
       setLoading(false);
-      console.error("AuthContext.loginWithEmail CAUGHT ERROR. Code:", error.code, "Message:", error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("AuthContext.loginWithEmail CAUGHT ERROR:", errorMessage);
       let specificErrorMessage = "An unexpected login error occurred.";
       let errorSource = "Unknown";
-      if (error.code && typeof error.code === 'string' && error.code.startsWith('auth/')) {
+      if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string' && error.code.startsWith('auth/')) {
         errorSource = "Firebase Auth";
         switch (error.code) {
           case 'auth/user-not-found':

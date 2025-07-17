@@ -95,9 +95,10 @@ export function usePassengerBookings(userId: string | undefined | null, statusFi
           orderBy('bookingTimestamp', 'desc')
         );
       }
-    } catch (queryError: FirebaseError) {
+    } catch (queryError: unknown) {
+      const errorMessage = queryError instanceof Error ? queryError.message : String(queryError);
       console.error('usePassengerBookings: Error creating query:', queryError);
-      setError(`Query error: ${queryError.message}`);
+      setError(`Query error: ${errorMessage}`);
       setLoading(false);
       return;
     }
@@ -113,9 +114,10 @@ export function usePassengerBookings(userId: string | undefined | null, statusFi
             setBookings(rides);
             setLoading(false);
             setError(null);
-          } catch (snapshotError: FirebaseError) {
+          } catch (snapshotError: unknown) {
+            const errorMessage = snapshotError instanceof Error ? snapshotError.message : String(snapshotError);
             console.error('usePassengerBookings: Error processing snapshot:', snapshotError);
-            setError(`Snapshot processing error: ${snapshotError.message}`);
+            setError(`Snapshot processing error: ${errorMessage}`);
             setLoading(false);
           }
         },
@@ -125,9 +127,10 @@ export function usePassengerBookings(userId: string | undefined | null, statusFi
           setLoading(false);
         }
       );
-    } catch (onSnapshotError: FirebaseError) {
+    } catch (onSnapshotError: unknown) {
+      const errorMessage = onSnapshotError instanceof Error ? onSnapshotError.message : String(onSnapshotError);
       console.error('usePassengerBookings: Error setting up onSnapshot:', onSnapshotError);
-      setError(`Snapshot setup error: ${onSnapshotError.message}`);
+      setError(`Snapshot setup error: ${errorMessage}`);
       setLoading(false);
     }
     
@@ -135,7 +138,7 @@ export function usePassengerBookings(userId: string | undefined | null, statusFi
       if (unsubscribe) {
         try {
           unsubscribe();
-        } catch (cleanupError: FirebaseError) {
+        } catch (cleanupError: unknown) {
           console.error('usePassengerBookings: Error during cleanup:', cleanupError);
         }
       }

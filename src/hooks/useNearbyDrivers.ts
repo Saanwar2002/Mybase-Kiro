@@ -73,9 +73,10 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
           where('status', '==', 'Active')
         );
       }
-    } catch (queryError: FirebaseError) {
+    } catch (queryError: unknown) {
+      const errorMessage = queryError instanceof Error ? queryError.message : String(queryError);
       console.error('useNearbyDrivers: Error creating query:', queryError);
-      setError(`Query error: ${queryError.message}`);
+      setError(`Query error: ${errorMessage}`);
       setLoading(false);
       return;
     }
@@ -95,7 +96,7 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                     return { id: doc.id, ...data } as DriverMarker;
                   }
                   return null;
-                } catch (docError: FirebaseError) {
+                } catch (docError: unknown) {
                   console.error('useNearbyDrivers: Error processing driver doc:', docError);
                   return null;
                 }
@@ -115,7 +116,7 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                   );
                   console.log(`[useNearbyDrivers] Driver ${driver.id} at (${driver.location.lat},${driver.location.lng}) distance from pickup: ${dist.toFixed(2)} miles`);
                   return dist <= NEARBY_RADIUS_MILES;
-                } catch (distanceError: FirebaseError) {
+                } catch (distanceError: unknown) {
                   console.error('useNearbyDrivers: Error calculating distance for driver:', driver.id, distanceError);
                   return false;
                 }
@@ -141,7 +142,7 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                               return { id: doc.id, ...data } as DriverMarker;
                             }
                             return null;
-                          } catch (docError: FirebaseError) {
+                          } catch (docError: unknown) {
                             console.error('useNearbyDrivers: Error processing fallback driver doc:', docError);
                             return null;
                           }
@@ -159,7 +160,7 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                             );
                             console.log(`[useNearbyDrivers] (Fallback) Driver ${driver.id} at (${driver.location.lat},${driver.location.lng}) distance from pickup: ${dist.toFixed(2)} miles`);
                             return dist <= NEARBY_RADIUS_MILES;
-                          } catch (distanceError: FirebaseError) {
+                          } catch (distanceError: unknown) {
                             console.error('useNearbyDrivers: Error calculating fallback distance for driver:', driver.id, distanceError);
                             return false;
                           }
@@ -168,9 +169,10 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                       setDrivers(fallbackDrivers);
                       setUsedFallback(true);
                       setLoading(false);
-                    } catch (fallbackSnapshotError: FirebaseError) {
+                    } catch (fallbackSnapshotError: unknown) {
+                      const errorMessage = fallbackSnapshotError instanceof Error ? fallbackSnapshotError.message : String(fallbackSnapshotError);
                       console.error('useNearbyDrivers: Error processing fallback snapshot:', fallbackSnapshotError);
-                      setError(`Fallback snapshot error: ${fallbackSnapshotError.message}`);
+                      setError(`Fallback snapshot error: ${errorMessage}`);
                       setLoading(false);
                     }
                   },
@@ -181,18 +183,20 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
                   }
                 );
                 return () => fallbackUnsub();
-              } catch (fallbackQueryError: FirebaseError) {
+              } catch (fallbackQueryError: unknown) {
+                const errorMessage = fallbackQueryError instanceof Error ? fallbackQueryError.message : String(fallbackQueryError);
                 console.error('useNearbyDrivers: Error creating fallback query:', fallbackQueryError);
-                setError(`Fallback query error: ${fallbackQueryError.message}`);
+                setError(`Fallback query error: ${errorMessage}`);
                 setLoading(false);
               }
             } else {
               setDrivers(driverMarkers);
               setLoading(false);
             }
-          } catch (snapshotError: FirebaseError) {
+          } catch (snapshotError: unknown) {
+            const errorMessage = snapshotError instanceof Error ? snapshotError.message : String(snapshotError);
             console.error('useNearbyDrivers: Error processing snapshot:', snapshotError);
-            setError(`Snapshot processing error: ${snapshotError.message}`);
+            setError(`Snapshot processing error: ${errorMessage}`);
             setLoading(false);
           }
         },
@@ -202,9 +206,10 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
           setLoading(false);
         }
       );
-    } catch (onSnapshotError: FirebaseError) {
+    } catch (onSnapshotError: unknown) {
+      const errorMessage = onSnapshotError instanceof Error ? onSnapshotError.message : String(onSnapshotError);
       console.error('useNearbyDrivers: Error setting up onSnapshot:', onSnapshotError);
-      setError(`Snapshot setup error: ${onSnapshotError.message}`);
+      setError(`Snapshot setup error: ${errorMessage}`);
       setLoading(false);
     }
     
@@ -212,7 +217,7 @@ export function useNearbyDrivers(pickupCoords?: { lat: number; lng: number }, op
       if (unsubscribe) {
         try {
           unsubscribe();
-        } catch (cleanupError: FirebaseError) {
+        } catch (cleanupError: unknown) {
           console.error('useNearbyDrivers: Error during cleanup:', cleanupError);
         }
       }
