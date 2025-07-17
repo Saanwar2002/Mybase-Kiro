@@ -75,7 +75,7 @@
   - Fix coordinate type casting for map components
   - _Requirements: 2.2, 2.6_
 
-- [ ] 3.6 Fix Firebase error handling types
+- [x] 3.6 Fix Firebase error handling types
   - Replace FirebaseError type annotations with unknown
   - Add proper error type checking in catch blocks
   - Fix Firebase Auth and Firestore parameter types
