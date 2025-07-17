@@ -50,7 +50,7 @@ export function useFavoriteDrivers(userId: string | undefined | null) {
                   avatarUrl = avatarUrl || driverData.avatarUrl;
                   vehicleInfo = vehicleInfo || (driverData.vehicleMakeModel ? driverData.vehicleMakeModel : '') + (driverData.vehicleRegistration ? ` - ${driverData.vehicleRegistration}` : '');
                   // Fetch customId (OP001/DR...)
-                  var customId = driverData.customId || driverData.driverIdentifier || '';
+                  const customId = driverData.customId || driverData.driverIdentifier || '';
                 }
               }
             } catch {}
