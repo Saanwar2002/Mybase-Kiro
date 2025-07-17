@@ -113,29 +113,78 @@
     - Dashboard and management pages
     - Driver and operator functionality pages
 
-## 2025-01-16 - Code Quality Cleanup Phase 2 (Type Safety Improvements)
+## 2025-01-16 - Code Quality Cleanup Phase 2 (Null and Undefined Safety)
 
-### Type Safety Improvements - COMPLETED ✅
-- **Replaced explicit `any` types with proper TypeScript interfaces** (Task 3.1):
-  - Created comprehensive interfaces in `src/types/global.d.ts`
-  - Fixed Firebase-related `any` types throughout the codebase
-  - Enhanced component interfaces and API route typing
-  - Updated 25+ files with proper TypeScript interfaces
+### Null and Undefined Safety Checks - IN PROGRESS 🔄
+- **Fixed critical null/undefined property access issues**:
+  - **Track Ride Page (`src/app/(app)/dashboard/track-ride/page.tsx`)**:
+    - Added null safety for `activeRide.driver` property access
+    - Fixed `activeRide.driverEtaMinutes` type checking with proper number validation
+    - Added array safety checks for `activeRide.stops` with `Array.isArray()` validation
+    - Fixed booking ID display with proper fallback chain: `activeRide?.displayBookingId || activeRide?.id || 'N/A'`
+    - Enhanced Image component `alt` prop with fallback value
+  - **Driver Ride History Page (`src/app/(app)/driver/ride-history/page.tsx`)**:
+    - Fixed `convertTS` function to properly handle SerializedTimestamp types
+    - Added Firebase null safety checks before collection/doc operations
+    - Fixed missing `fetchRideHistory` function reference (replaced with `window.location.reload()`)
+    - Added null safety for `ride.driverRatingForPassenger` rating comparisons
+    - Fixed Timestamp conversion in ticket display with proper type checking
 
-### Null and Undefined Safety Checks - NEEDS COMPLETION ⏳
-- **Task 3.2 Status**: Not yet started
-- **Required fixes**:
-  - Add optional chaining for object property access
-  - Add null checks before method calls
-  - Fix potentially undefined object access
-- **Affected areas**: Components, hooks, API routes with property access
+### Firebase Null Safety Improvements - COMPLETED ✅
+- **API Routes Firebase Operations**:
+  - **Booking ID Generation (`src/app/api/bookings/generate-booking-id/route.ts`)**:
+    - Added null checks for `counterDoc.data()` before accessing properties
+    - Enhanced error handling for null counter document data
+  - **Driver Management (`src/app/api/operator/drivers/[driverId]/route.ts`)**:
+    - Fixed `counterDoc.data()` null safety in driver ID generation
+    - Corrected `docSnap.exists()` method call (removed parentheses)
+    - Fixed undefined `entity` variable in DELETE response
+  - **Drivers Route (`src/app/api/operator/drivers/route.ts`)**:
+    - Added null safety for counter document data access
+  - **Scheduled Bookings (`src/app/api/scheduled-bookings/[scheduleId]/route.ts`)**:
+    - Fixed all `scheduleSnap.exists()` method calls (removed parentheses)
+    - Added null safety for `existingScheduleData` and `data` object access
+    - Enhanced property access with optional chaining
+  - **Bookings Update (`src/app/api/bookings/update-details/route.ts`)**:
+    - Added missing imports: `NextRequest`, `Timestamp`, `deleteField`
+    - Fixed `bookingData` null safety checks before property access
 
-### Function Signature and Return Type Issues - NEEDS COMPLETION ⏳
-- **Task 3.3 Status**: Not yet started
-- **Required fixes**:
-  - Correct parameter types in function definitions
-  - Add proper return type annotations
-  - Fix callback function parameter types
+### Component Null Safety Fixes - COMPLETED ✅
+- **Driver Help Support (`src/app/(app)/driver/help-support/page.tsx`)**:
+  - Fixed Timestamp conversion in ticket display with proper type checking
+  - Added support for both Timestamp and SerializedTimestamp formats
+- **Operator Management Pages**:
+  - **Manage Drivers (`src/app/(app)/operator/manage-drivers/page.tsx`)**:
+    - Fixed index signature issues in `updatedData` object iteration
+    - Moved `handleDeleteDriver` function inside component scope
+    - Removed duplicate function definition
+  - **Drivers Awaiting Approval (`src/app/(app)/operator/drivers-awaiting-approval/page.tsx`)**:
+    - Fixed invalid toast variant from "success" to default
+
+### Import and Type Definition Fixes - COMPLETED ✅
+- **API Routes**:
+  - **Admin Operators Create (`src/app/api/admin/operators/create/route.ts`)**:
+    - Added missing `z` import from zod library
+  - **Admin Users Route (`src/app/api/admin/users/route.ts`)**:
+    - Fixed Query type assignment issues with proper `any` typing
+- **Components**:
+  - **Register Form (`src/components/auth/register-form.tsx`)**:
+    - Removed duplicate `Timestamp` import to resolve conflicts
+  - **Login Form (`src/components/auth/login-form.tsx`)**:
+    - Fixed `loginWithEmail` function signature (removed extra role parameter)
+
+### Files Updated (20+ files)
+- Dashboard and tracking pages
+- Driver management and history pages
+- API routes for bookings, drivers, and scheduled operations
+- Authentication and form components
+- Operator management interfaces
+
+### Remaining Null Safety Issues
+- Property access on potentially undefined objects in remaining components
+- Firebase operation null checks in hooks and utilities
+- Component prop validation and default value handling
+- API response data validation and error handling
 
 ## [Unreleased - Remaining Work]
 
@@ -145,89 +194,38 @@
 - Restored always-visible bottom controls card with toggles and status below the map.
 - Fixed build and rendering issues with the map, warning banner, and controls layout for a consistent user experience.
 
-### [TODO: Remaining Work - Phase 3-5]
+### [TODO: Next Phase - Type Safety Improvements]
 
-#### Outstanding ESLint Issues (Phase 3) - PENDING ⏳
-- **Task 4.1**: Remove unused imports and variables
-  - Remove unused Lucide icon imports
-  - Remove unused ShadCN component imports
-  - Remove unused state variables and functions
-  - Remove unused parameters in functions
-- **Task 4.2**: Fix JSX unescaped entities
-  - Replace unescaped apostrophes with &apos; or &#39;
-  - Replace unescaped quotes with &quot; or &#34;
-  - Ensure all JSX text content is properly escaped
-- **Task 4.3**: Fix variable declaration preferences
-  - Replace let with const where variables are not reassigned
-  - Remove var declarations in favor of const/let
-  - Fix prefer-const ESLint rule violations
-- **Task 4.4**: Fix undefined component references
-  - Import missing components (Timer, Shield, Briefcase, etc.)
-  - Remove references to undefined components
-  - Fix component import paths
+#### Remaining TypeScript Issues (Phase 2)
+- Replace explicit `any` types with proper TypeScript interfaces (50+ instances)
+- Add null/undefined safety checks for object property access
+- Fix function signature and return type mismatches
+- Create proper TypeScript interfaces for Firebase document types
 
-#### React Hook and Best Practices Issues (Phase 4) - PENDING ⏳
-- **Task 5.1**: Fix useEffect dependency arrays
-  - Add missing dependencies to useEffect hooks
-  - Remove unnecessary dependencies from useEffect hooks
-  - Fix exhaustive-deps ESLint rule violations
-- **Task 5.2**: Fix React component and prop issues
-  - Fix component prop type mismatches
-  - Add proper key props for list items
-  - Fix React hook usage patterns
-- **Task 5.3**: Fix dialog and modal component issues
-  - Fix DialogContent asChild array warnings
-  - Wrap dialog children in proper containers
-  - Fix modal component prop passing
+#### Outstanding ESLint Issues (Phase 3)
+- Unused variables, imports, and components (200+ instances)
+- Unescaped characters in JSX (e.g., `'` or `"` should be escaped)
+- Variables assigned but never used
+- Prefer `const` over `let` or `var`
+- Component or variable is not defined
 
-#### Configuration and Build Issues (Phase 5) - PENDING ⏳
-- **Task 6.1**: Fix Tailwind configuration issues
-  - Remove duplicate keyframes definitions
-  - Fix configuration syntax errors
-  - Ensure proper CSS generation
-- **Task 6.2**: Fix package.json and dependency issues
-  - Update package versions if needed
-  - Fix dependency conflicts
-  - Ensure all required packages are installed
+#### React Hook Issues (Phase 4)
+- React hook dependency warnings (missing or unnecessary dependencies in `useEffect`)
+- Fix exhaustive-deps ESLint rule violations
+- Add proper cleanup functions for effects
 
-#### Testing and Validation (Phase 6) - PENDING ⏳
-- **Task 7.1**: Run automated verification
-  - Execute npm run lint and verify zero errors
-  - Execute npm run typecheck and verify zero errors
-  - Execute npm run build and verify successful compilation
-- **Task 7.2**: Manual functionality testing
-  - Test authentication flows (login, register, logout)
-  - Test booking system (create, track, complete rides)
-  - Test driver dashboard functionality
-  - Test operator control panel features
-- **Task 7.3**: Performance and runtime verification
-  - Check for new runtime errors in browser console
-  - Verify no performance regressions
-  - Test responsive design and UI components
-
-#### Final Cleanup and Documentation (Phase 7) - PENDING ⏳
-- **Task 8.1**: Code organization and cleanup
-  - Remove any remaining dead code
-  - Organize imports consistently
-  - Add code comments where needed for complex fixes
-- **Task 8.2**: Update documentation and changelog
-  - Update LOGCHANGE.md with completed fixes
-  - Document any breaking changes or new patterns
-  - Update README if needed
-- **Task 8.3**: Prepare for deployment
-  - Create clean commit history with descriptive messages
-  - Prepare branch for merge or new repository setup
-  - Document deployment considerations
+**Affected areas:**
+- Dashboard pages
+- Driver and operator pages
+- API route files
+- Components and hooks
 
 ### Progress Summary
-- ✅ **Phase 1 Complete**: Critical TypeScript compilation errors resolved (Tasks 1, 2.1-2.4)
-- ✅ **Phase 2 Complete**: Type safety improvements (Task 3.1)
-- ⏳ **Phase 2 Remaining**: Null safety and function signatures (Tasks 3.2-3.3)
-- ⏳ **Phase 3 Pending**: ESLint code quality fixes (Tasks 4.1-4.4)
-- ⏳ **Phase 4 Pending**: React best practices (Tasks 5.1-5.3)
-- ⏳ **Phase 5 Pending**: Configuration fixes (Tasks 6.1-6.2)
-- ⏳ **Phase 6 Pending**: Testing and validation (Tasks 7.1-7.3)
-- ⏳ **Phase 7 Pending**: Final cleanup and documentation (Tasks 8.1-8.3)
+- ✅ **Phase 1 Complete**: Critical TypeScript compilation errors resolved
+- 🔄 **Phase 2 In Progress**: Type safety improvements
+- ⏳ **Phase 3 Pending**: ESLint code quality fixes
+- ⏳ **Phase 4 Pending**: React best practices
+- ⏳ **Phase 5 Pending**: Final verification and testing
 
 ### Code Change Rules
 - When fixing code quality issues (unused variables, any types, etc.), always fix one error type at a time, re-run the relevant linter or type checker after each fix, and only proceed to the next error type after confirming the previous is resolved.
