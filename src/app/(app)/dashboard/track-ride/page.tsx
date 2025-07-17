@@ -908,7 +908,7 @@ export default function MyActiveRidePage() {
       });
     }
 
-    if (activeRide.pickupLocation) {
+    if (activeRide.pickupLocation && typeof activeRide.pickupLocation === 'object' && 'latitude' in activeRide.pickupLocation && 'longitude' in activeRide.pickupLocation && 'address' in activeRide.pickupLocation) {
       markers.push({
         position: { lat: activeRide.pickupLocation.latitude, lng: activeRide.pickupLocation.longitude },
         title: `Pickup: ${activeRide.pickupLocation.address}`,
