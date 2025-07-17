@@ -41,10 +41,11 @@ import { db } from '@/lib/firebase';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
-interface JsonTimestamp {
-  _seconds: number;
-  _nanoseconds: number;
-}
+// Import SerializedTimestamp from global types
+import { SerializedTimestamp, Timestamp } from '@/types/global';
+
+// Alias SerializedTimestamp to JsonTimestamp for backward compatibility
+type JsonTimestamp = SerializedTimestamp;
 
 interface LocationPoint {
   address: string;
@@ -52,17 +53,29 @@ interface LocationPoint {
   longitude: number;
 }
 
+// Extended driver information interface
+interface DriverInfo {
+  name?: string;
+  avatarUrl?: string;
+  vehicleMakeModel?: string;
+  phone?: string;
+  [key: string]: unknown;
+}
+
+// Enhanced Ride interface that matches both the component needs and Firestore data
 interface Ride {
   id: string;
   displayBookingId?: string;
   originatingOperatorId?: string;
-  bookingTimestamp?: JsonTimestamp | null;
+  bookingTimestamp: JsonTimestamp | Timestamp;
   scheduledPickupAt?: string | null;
-  pickupLocation: LocationPoint;
-  dropoffLocation: LocationPoint;
+  pickupLocation: LocationPoint | string;
+  dropoffLocation: LocationPoint | string;
   stops?: LocationPoint[];
   driverId?: string;
-  driver?: string;
+  driver?: string | DriverInfo;
+  driverName?: string;
+  driver_name?: string;
   driverAvatar?: string;
   vehicleType: string;
   fareEstimate: number;
@@ -72,25 +85,45 @@ interface Ride {
   isSurgeApplied?: boolean;
   notifiedPassengerArrivalTimestamp?: JsonTimestamp | null;
   passengerAcknowledgedArrivalTimestamp?: JsonTimestamp | null;
-  rideStartedAt?: JsonTimestamp | null; 
+  rideStartedAt?: JsonTimestamp | null;
+  completedAt?: JsonTimestamp | null;
   paymentMethod?: "card" | "cash";
+  [key: string]: unknown; // Allow additional properties from Firestore
 }
 
-const formatDate = (timestamp?: JsonTimestamp | null, isoString?: string | null): string => {
+const formatDate = (timestamp?: JsonTimestamp | Timestamp | null, isoString?: string | null): string => {
   if (isoString) {
     try {
       const date = parseISO(isoString);
-       if (!isValid(date)) return 'Scheduled time N/A (Invalid ISO Date)';
+      if (!isValid(date)) return 'Scheduled time N/A (Invalid ISO Date)';
       return format(date, "PPPp");
     } catch (e) { return 'Scheduled time N/A (ISO Parse Error)'; }
   }
+  
   if (!timestamp) return 'Date/Time N/A (Missing)';
-  if (typeof timestamp._seconds !== 'number' || typeof timestamp._nanoseconds !== 'number') return 'Date/Time N/A (Bad Timestamp Structure)';
-  try {
-    const date = new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000);
-    if (!isValid(date)) return 'Date/Time N/A (Invalid Date Obj)';
-    return format(date, "PPPp");
-  } catch (e) { return 'Date/Time N/A (Conversion Error)'; }
+  
+  // Handle Firebase Timestamp object
+  if (timestamp instanceof Timestamp && typeof timestamp.toDate === 'function') {
+    try {
+      const date = timestamp.toDate();
+      if (!isValid(date)) return 'Date/Time N/A (Invalid Timestamp)';
+      return format(date, "PPPp");
+    } catch (e) { return 'Date/Time N/A (Timestamp Conversion Error)'; }
+  }
+  
+  // Handle SerializedTimestamp (JsonTimestamp)
+  if ('_seconds' in timestamp && '_nanoseconds' in timestamp) {
+    if (typeof timestamp._seconds !== 'number' || typeof timestamp._nanoseconds !== 'number') {
+      return 'Date/Time N/A (Bad Timestamp Structure)';
+    }
+    try {
+      const date = new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000);
+      if (!isValid(date)) return 'Date/Time N/A (Invalid Date Obj)';
+      return format(date, "PPPp");
+    } catch (e) { return 'Date/Time N/A (Conversion Error)'; }
+  }
+  
+  return 'Date/Time N/A (Unknown Format)';
 };
 
 const editDetailsFormSchema = z.object({
@@ -169,11 +202,38 @@ export default function MyRidesPage() {
     }).catch(e => console.error("Failed to load Google Maps API for MyRidesPage", e));
   }, []);
 
-  const displayedRides = bookings.filter(ride => ride.status === 'completed' || ride.status === 'cancelled' || ride.status === 'cancelled_by_driver')
-    .map(ride => ({
-      ...ride,
-      driver: ride.driver || ride.driverName || ride.driver_name || '',
-    }));
+  // Convert bookings to properly typed Ride objects
+  const displayedRides = bookings
+    .filter(ride => ride.status === 'completed' || ride.status === 'cancelled' || ride.status === 'cancelled_by_driver')
+    .map(ride => {
+      // Create a properly typed driver object if it's a string
+      let driverObj: string | DriverInfo = ride.driver || '';
+      
+      // If driver is a string, convert it to a DriverInfo object
+      if (typeof driverObj === 'string') {
+        const driverName = driverObj || ride.driverName || ride.driver_name || 'Unknown Driver';
+        driverObj = { name: driverName };
+      }
+      
+      // Return a properly typed Ride object
+      return {
+        ...ride,
+        id: ride.id,
+        status: ride.status,
+        bookingTimestamp: ride.bookingTimestamp,
+        pickupLocation: ride.pickupLocation || { address: 'Unknown location', latitude: 0, longitude: 0 },
+        dropoffLocation: ride.dropoffLocation || { address: 'Unknown location', latitude: 0, longitude: 0 },
+        vehicleType: ride.vehicleType || 'Standard',
+        fareEstimate: ride.fareEstimate || 0,
+        passengerName: ride.passengerName || '',
+        driver: driverObj,
+        displayBookingId: ride.displayBookingId,
+        scheduledPickupAt: ride.scheduledPickupAt,
+        rideStartedAt: ride.rideStartedAt,
+        completedAt: ride.completedAt,
+        rating: ride.rating,
+      } as Ride;
+    });
 
   const handleRateRide = (ride: Ride) => { setSelectedRideForRating(ride); setCurrentRating(ride.rating || 0); };
   
