@@ -110,7 +110,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const existingScheduleData = scheduleSnap.data();
     // Verify ownership using passengerId from payload (replace with authenticatedUserId in real app)
-    if (updateData.passengerId !== existingScheduleData.passengerId) {
+    if (existingScheduleData && updateData.passengerId !== existingScheduleData.passengerId) {
       return NextResponse.json({ message: 'Unauthorized to update this schedule.' }, { status: 403 });
     }
 
@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     nullableFields.forEach(field => {
         if (finalUpdatePayload[field] === null) {
             finalUpdatePayload[field] = null; // Firestore accepts null
-        } else if (finalUpdatePayload[field] === undefined && existingScheduleData[field] !== undefined) {
+        } else if (finalUpdatePayload[field] === undefined && existingScheduleData && existingScheduleData[field] !== undefined) {
             // If undefined in payload but exists in DB, means don't change it. If explicitly want to remove, send null.
         }
     });
@@ -175,7 +175,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
     const scheduleData = scheduleSnap.data();
     if (scheduleData?.passengerId !== passengerId) { 
-      console.warn(`API DELETE /scheduled-bookings/${scheduleId}: Unauthorized attempt by passenger ${passengerId}. Owner is ${scheduleData.passengerId}.`);
+      console.warn(`API DELETE /scheduled-bookings/${scheduleId}: Unauthorized attempt by passenger ${passengerId}. Owner is ${scheduleData?.passengerId}.`);
       return NextResponse.json({ message: 'Unauthorized to delete this schedule.' }, { status: 403 });
     }
     await scheduleRef.delete();
