@@ -80,7 +80,18 @@ const formSchema = z.object({
 
 type RegistrationStep = 'initial' | 'verifyingPhone';
 
-import { Timestamp, SerializedTimestamp, FirebaseError } from '@/types/global';
+// Firebase Timestamp type for compatibility
+interface SerializedTimestamp {
+  _seconds: number;
+  _nanoseconds: number;
+}
+
+// Firebase error interface
+interface FirebaseError {
+  code: string;
+  message: string;
+  name?: string;
+}
 
 interface UserProfile { 
   uid: string;
